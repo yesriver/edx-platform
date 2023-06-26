@@ -775,8 +775,7 @@ openedx-events==8.2.0
     #   -r requirements/edx/kernel.in
     #   edx-event-bus-kafka
     #   edx-event-bus-redis
-    #   skill-tagging
-openedx-filters==1.3.0
+openedx-filters @ git+https://github.com/openedx/openedx-filters.git@MJG/instructor-tab-filters
     # via
     #   -r requirements/edx/kernel.in
     #   lti-consumer-xblock
