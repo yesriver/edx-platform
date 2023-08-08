@@ -8,7 +8,7 @@ cffi==1.15.1
     # via cryptography
 chem==1.2.0
     # via -r requirements/edx-sandbox/py38.in
-click==8.1.5
+click==8.1.6
     # via
     #   -c requirements/edx-sandbox/../constraints.txt
     #   nltk
@@ -58,7 +58,7 @@ pillow==9.5.0
     #   matplotlib
 pycparser==2.21
     # via cffi
-pyparsing==3.1.0
+pyparsing==3.1.1
     # via
     #   -r requirements/edx-sandbox/py38.in
     #   chem
