@@ -13,6 +13,7 @@ from openedx_events.learning.signals import (
 )
 
 from openedx.core.djangoapps.notifications.config.waffle import ENABLE_NOTIFICATIONS
+from openedx.core.djangoapps.notifications.events import notification_generated_event
 from openedx.core.djangoapps.notifications.models import CourseNotificationPreference
 
 log = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ def on_user_course_unenrollment(enrollment, **kwargs):
         preference = CourseNotificationPreference.objects.get(user__id=user_id, course_id=course_key)
         preference.delete()
     except ObjectDoesNotExist:
-        log.info(f'Notification Preference doesnot exist for {enrollment.user.pii.username} in {course_key}')
+        log.info(f'Notification Preference does not exist for {enrollment.user.pii.username} in {course_key}')
 
 
 @receiver(USER_NOTIFICATION_REQUESTED)
@@ -58,3 +59,4 @@ def generate_user_notifications(signal, sender, notification_data, metadata, **k
     notification_data = notification_data.__dict__
     notification_data['course_key'] = str(notification_data['course_key'])
     send_notifications.delay(**notification_data)
+    notification_generated_event(notification_data)
