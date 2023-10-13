@@ -16,8 +16,10 @@ from common.djangoapps.student.roles import CourseStaffRole
 from openedx.core.djangoapps.agreements.api import (
     create_integrity_signature,
     get_integrity_signature,
+    create_lti_pii_signature,
+    get_pii_receiving_lti_tools,
 )
-from openedx.core.djangoapps.agreements.serializers import IntegritySignatureSerializer
+from openedx.core.djangoapps.agreements.serializers import IntegritySignatureSerializer, LTIPIISignatureSerializer
 
 
 def is_user_course_or_global_staff(user, course_id):
@@ -118,4 +120,41 @@ class IntegritySignatureView(AuthenticatedAPIView):
         username = request.user.username
         signature = create_integrity_signature(username, course_id)
         serializer = IntegritySignatureSerializer(signature)
+        return Response(serializer.data)
+
+
+class LTIPIISignatureView(AuthenticatedAPIView):
+    """
+    Endpoint for a LTI PII Signature
+    /lti_pii_signature/{course_id}
+
+    HTTP POST
+        * Do not create an LTIPIISignature record if the feature is not enabled via the CourseWaffleFlag
+        * If an LTI PII signature does not exist for the user + course, creates one and
+          returns it. If one does exist, returns the existing signature.
+    """
+
+    def post(self, request, course_id):
+        """
+        Create an LTI PII signature for the requesting user and course. If a signature
+        already exists, returns the existing signature instead of creating a new one.
+
+        /api/agreements/v1/lti_pii_signature/{course_id}
+
+        Example response:
+            {
+                username: "janedoe",
+                course_id: "org.2/course_2/Run_2",
+                created_at: "2021-04-23T18:25:43.511Z"
+            }
+        """
+        if not settings.FEATURES.get('ENABLE_LTI_PII_ACKNOWLEDGEMENT'):
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        username = request.user.username
+        lti_tools = get_pii_receiving_lti_tools(course_id)
+        signature = create_lti_pii_signature(username, course_id, lti_tools)
+        serializer = LTIPIISignatureSerializer(signature)
         return Response(serializer.data)
