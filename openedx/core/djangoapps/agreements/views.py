@@ -152,7 +152,7 @@ class LTIPIISignatureView(AuthenticatedAPIView):
             return Response(
                 status=status.HTTP_404_NOT_FOUND,
             )
-        
+
         username = request.user.username
         lti_tools = get_pii_receiving_lti_tools(course_id)
         signature = create_lti_pii_signature(username, course_id, lti_tools)

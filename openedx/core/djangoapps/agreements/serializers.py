@@ -30,4 +30,4 @@ class LTIPIISignatureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LTIPIISignature()
-        fields = ('username', 'course_id','lti_tools', 'created_at')
+        fields = ('username', 'course_id', 'lti_tools', 'created_at')
