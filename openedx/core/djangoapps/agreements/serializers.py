@@ -25,7 +25,7 @@ class LTIPIISignatureSerializer(serializers.ModelSerializer):
     """
     username = serializers.CharField(source='user.username')
     course_id = CourseKeyField(source='course_key')
-    lti_tools = serializers.JSONField(False, None)
+    lti_tools = serializers.JSONField()
     created_at = serializers.DateTimeField(source='created')
 
     class Meta:
