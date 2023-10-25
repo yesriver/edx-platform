@@ -199,38 +199,24 @@ class SendBatchNotificationsTest(ModuleStoreTestCase):
 
     @override_waffle_flag(ENABLE_NOTIFICATIONS, active=True)
     @ddt.data(
-        (settings.NOTIFICATION_CREATION_BATCH_SIZE, 1, 2),
-        (settings.NOTIFICATION_CREATION_BATCH_SIZE + 10, 2, 4),
-        (settings.NOTIFICATION_CREATION_BATCH_SIZE - 10, 1, 2),
+        (settings.NOTIFICATION_CREATION_BATCH_SIZE, 2),
+        (settings.NOTIFICATION_CREATION_BATCH_SIZE + 10, 4),
+        (settings.NOTIFICATION_CREATION_BATCH_SIZE - 10, 2),
     )
     @ddt.unpack
-    def test_notification_is_send_in_batch(self, creation_size, prefs_query_count, notifications_query_count):
+    def test_notification_is_send_in_batch(self, creation_size, notifications_query_count):
         """
         Tests notifications and notification preferences are created in batches
         """
         notification_app = "discussion"
-        notification_type = "new_discussion_post"
+        notification_type = "new_comment"
         users = self._create_users(creation_size)
         user_ids = [user.id for user in users]
         context = {
             "post_title": "Test Post",
-            "username": "Test Author"
+            "author_name": "Test Author",
+            "replier_name": "Test Replier"
         }
-
-        # Creating preferences and asserting query count
-        with self.assertNumQueries(prefs_query_count):
-            send_notifications(user_ids, str(self.course.id), notification_app, notification_type,
-                               context, "http://test.url")
-
-        # Updating preferences for notification creation
-        preferences = CourseNotificationPreference.objects.filter(
-            user_id__in=user_ids,
-            course_id=self.course.id
-        )
-        for preference in preferences:
-            discussion_config = preference.notification_preference_config['discussion']
-            discussion_config['notification_types'][notification_type]['web'] = True
-            preference.save()
 
         # Creating notifications and asserting query count
         with self.assertNumQueries(notifications_query_count):

@@ -231,9 +231,7 @@ class UserNotificationPreferenceAPITest(ModuleStoreTestCase):
                             'push': True,
                             'info': 'Notifications for responses and comments on your posts, and the ones you’re '
                                     'following, including endorsements to your responses and on your posts.'
-                        },
-                        'new_discussion_post': {'web': False, 'email': False, 'push': False, 'info': ''},
-                        'new_question_post': {'web': False, 'email': False, 'push': False, 'info': ''},
+                        }
                     },
                     'non_editable': {
                         'core': ['web']

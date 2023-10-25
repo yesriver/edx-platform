@@ -48,40 +48,6 @@ COURSE_NOTIFICATION_TYPES = {
         'email_template': '',
         'filters': [FILTER_AUDIT_EXPIRED]
     },
-    'new_discussion_post': {
-        'notification_app': 'discussion',
-        'name': 'new_discussion_post',
-        'is_core': False,
-        'info': '',
-        'web': False,
-        'email': False,
-        'push': False,
-        'non_editable': [],
-        'content_template': _('<{p}><{strong}>{username}</{strong}> posted <{strong}>{post_title}</{strong}></{p}>'),
-        'content_context': {
-            'post_title': 'Post title',
-            'username': 'Post author name',
-        },
-        'email_template': '',
-        'filters': [FILTER_AUDIT_EXPIRED]
-    },
-    'new_question_post': {
-        'notification_app': 'discussion',
-        'name': 'new_question_post',
-        'is_core': False,
-        'info': '',
-        'web': False,
-        'email': False,
-        'push': False,
-        'non_editable': [],
-        'content_template': _('<{p}><{strong}>{username}</{strong}> asked <{strong}>{post_title}</{strong}></{p}>'),
-        'content_context': {
-            'post_title': 'Post title',
-            'username': 'Post author name',
-        },
-        'email_template': '',
-        'filters': [FILTER_AUDIT_EXPIRED]
-    },
     'response_on_followed_post': {
         'notification_app': 'discussion',
         'name': 'response_on_followed_post',
