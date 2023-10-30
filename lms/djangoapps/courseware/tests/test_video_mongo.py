@@ -54,7 +54,7 @@ from xmodule.video_block.transcripts_utils import Transcript, save_to_store, sub
 from xmodule.video_block.video_block import EXPORT_IMPORT_COURSE_DIR, EXPORT_IMPORT_STATIC_DIR
 from xmodule.x_module import PUBLIC_VIEW, STUDENT_VIEW
 
-from common.djangoapps.xblock_django.constants import ATTR_KEY_REQUEST_COUNTRY_CODE
+from common.djangoapps.xblock_django.constants import ATTR_KEY_REQUEST_COUNTRY_CODE, ATTR_KEY_USER_ID
 from lms.djangoapps.courseware.tests.helpers import get_context_dict_from_string
 from openedx.core.djangoapps.video_config.toggles import PUBLIC_VIDEO_SHARE
 from openedx.core.djangoapps.video_pipeline.config.waffle import DEPRECATE_YOUTUBE
@@ -84,6 +84,9 @@ class TestVideoYouTube(TestVideo):  # lint-amnesty, pylint: disable=missing-clas
         """Make sure that all parameters extracted correctly from xml"""
         context = self.block.student_view(None).content
         sources = ['example.mp4', 'example.webm']
+
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
 
         expected_context = {
             'autoadvance_enabled': False,
@@ -124,6 +127,7 @@ class TestVideoYouTube(TestVideo):  # lint-amnesty, pylint: disable=missing-clas
                 'lmsRootURL': settings.LMS_ROOT_URL,
                 'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
                 'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+                'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
                 'autohideHtml5': False,
                 'recordedYoutubeIsAvailable': True,
                 'completionEnabled': False,
@@ -138,7 +142,9 @@ class TestVideoYouTube(TestVideo):  # lint-amnesty, pylint: disable=missing-clas
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         mako_service = self.block.runtime.service(self.block, 'mako')
@@ -170,6 +176,9 @@ class TestVideoNonYouTube(TestVideo):  # pylint: disable=test-inherits-tests
         """
         context = self.block.student_view(None).content
         sources = ['example.mp4', 'example.webm']
+
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
 
         expected_context = {
             'autoadvance_enabled': False,
@@ -210,6 +219,7 @@ class TestVideoNonYouTube(TestVideo):  # pylint: disable=test-inherits-tests
                 'lmsRootURL': settings.LMS_ROOT_URL,
                 'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
                 'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+                'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
                 'autohideHtml5': False,
                 'recordedYoutubeIsAvailable': True,
                 'completionEnabled': False,
@@ -224,7 +234,9 @@ class TestVideoNonYouTube(TestVideo):  # pylint: disable=test-inherits-tests
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         mako_service = self.block.runtime.service(self.block, 'mako')
@@ -367,6 +379,7 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             'lmsRootURL': settings.LMS_ROOT_URL,
             'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
             'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+            'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
             'autohideHtml5': False,
             'recordedYoutubeIsAvailable': True,
             'completionEnabled': False,
@@ -444,6 +457,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
         ]
         sources = ['example.mp4', 'example.webm']
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         expected_context = {
             'autoadvance_enabled': False,
             'branding_info': None,
@@ -467,7 +483,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         for data in cases:
@@ -575,6 +593,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             },
         ]
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         initial_context = {
             'autoadvance_enabled': False,
             'branding_info': None,
@@ -598,7 +619,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
         initial_context['metadata']['duration'] = None
 
@@ -616,6 +639,7 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             expected_context['metadata'].update({
                 'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
                 'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+                'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
                 'publishCompletionUrl': self.get_handler_url('publish_completion', ''),
                 'saveStateUrl': self.block.ajax_url + '/save_user_state',
                 'sources': data['result'].get('sources', []),
@@ -707,6 +731,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             }
         }
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         # Video found for edx_video_id
         metadata = self.default_metadata_dict
         metadata['autoplay'] = False
@@ -734,7 +761,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             ],
             'poster': 'null',
             'metadata': metadata,
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         DATA = SOURCE_XML.format(  # lint-amnesty, pylint: disable=invalid-name
@@ -766,6 +795,7 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
         expected_context['metadata'].update({
             'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
             'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+            'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
             'publishCompletionUrl': self.get_handler_url('publish_completion', ''),
             'saveStateUrl': self.block.ajax_url + '/save_user_state',
             'sources': data['result']['sources'],
@@ -886,6 +916,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             </video>
         """
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         # Video found for edx_video_id
         metadata = self.default_metadata_dict
         metadata['sources'] = ""
@@ -912,7 +945,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             ],
             'poster': 'null',
             'metadata': metadata,
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         # pylint: disable=invalid-name
@@ -931,6 +966,7 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
         expected_context['metadata'].update({
             'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
             'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+            'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
             'publishCompletionUrl': self.get_handler_url('publish_completion', ''),
             'saveStateUrl': self.block.ajax_url + '/save_user_state',
             'sources': data['result']['sources'],
@@ -1003,6 +1039,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             dict(case_data, edx_video_id="vid-v1:12345"),
         ]
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         initial_context = {
             'autoadvance_enabled': False,
             'branding_info': {
@@ -1030,7 +1069,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
         initial_context['metadata']['duration'] = None
 
@@ -1108,6 +1149,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
             dict(case_data, edx_video_id="vid-v1:12345"),
         ]
 
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         initial_context = {
             'autoadvance_enabled': False,
             'branding_info': None,
@@ -1129,7 +1173,9 @@ class TestGetHtmlMethod(BaseTestVideoXBlock):
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
         initial_context['metadata']['duration'] = None
 
@@ -2344,6 +2390,10 @@ class TestVideoWithBumper(TestVideo):  # pylint: disable=test-inherits-tests
 
         content = self.block.student_view(None).content
         sources = ['example.mp4', 'example.webm']
+
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         expected_context = {
             'autoadvance_enabled': False,
             'branding_info': None,
@@ -2399,6 +2449,7 @@ class TestVideoWithBumper(TestVideo):  # pylint: disable=test-inherits-tests
                 'lmsRootURL': settings.LMS_ROOT_URL,
                 'transcriptTranslationUrl': self.get_handler_url('transcript', 'translation/__lang__'),
                 'transcriptAvailableTranslationsUrl': self.get_handler_url('transcript', 'available_translations'),
+                'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
                 'autohideHtml5': False,
                 'recordedYoutubeIsAvailable': True,
                 'completionEnabled': False,
@@ -2416,7 +2467,9 @@ class TestVideoWithBumper(TestVideo):  # pylint: disable=test-inherits-tests
                 'url': 'http://img.youtube.com/vi/ZwkTiUPN0mg/0.jpg',
                 'type': 'youtube'
             })),
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
 
         mako_service = self.block.runtime.service(self.block, 'mako')
@@ -2440,6 +2493,10 @@ class TestAutoAdvanceVideo(TestVideo):  # lint-amnesty, pylint: disable=test-inh
         Build a dictionary with data expected by some operations in this test.
         Only parameters related to auto-advance are variable, rest is fixed.
         """
+
+        user_service = self.block.runtime.service(self.block, 'user')
+        user_id = user_service.get_current_user().opt_attrs[ATTR_KEY_USER_ID]
+
         context = {
             'autoadvance_enabled': autoadvanceenabled_flag,
             'branding_info': None,
@@ -2483,6 +2540,7 @@ class TestAutoAdvanceVideo(TestVideo):  # lint-amnesty, pylint: disable=test-inh
                 'transcriptAvailableTranslationsUrl': self.block.runtime.handler_url(
                     self.block, 'transcript', 'available_translations'
                 ).rstrip('/?'),
+                'aiTranslationsUrl': settings.AI_TRANSLATIONS_API_URL,
                 'autohideHtml5': False,
                 'recordedYoutubeIsAvailable': True,
                 'completionEnabled': False,
@@ -2497,7 +2555,9 @@ class TestAutoAdvanceVideo(TestVideo):  # lint-amnesty, pylint: disable=test-inh
                 {'display_name': 'Text (.txt) file', 'value': 'txt'}
             ],
             'poster': 'null',
-            'transcript_feedback_enabled': True,
+            'transcript_feedback_enabled': False,
+            'video_id': 'edx_video_id',
+            'user_id': user_id,
         }
         return context
 
